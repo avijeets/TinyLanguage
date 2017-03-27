@@ -146,16 +146,17 @@ static int expr()
 
 static void assign()
 {
-	/* YOUR CODE GOES HERE */
+	// VARIABLE = EXPR
 }
 
 static void print()
 {
-	/* YOUR CODE GOES HERE */
+	// # VARIABLE
 }
 
 static void stmt()
 {
+	//  STMT ::= ASSIGN | PRINT
 	switch(token){
 		case 'a':
 		case 'b':
@@ -186,17 +187,23 @@ static void stmt()
 
 static void morestmts()
 {
-	/* YOUR CODE GOES HERE */
+	// MORESTMTS ::= ; STMTLIST | epsilon
+	if(token == ';'){
+        next_token();
+        stmtlist();
+    }
 }
 
 static void stmtlist()
 {
-	/* YOUR CODE GOES HERE */
+	// STMTLIST ::= STMT MORESTMTS
+	stmt();
+    morestmts();
 }
 
 static void program()
 {
-	/* YOUR CODE GOES HERE */
+	// STMTLIST .
 
         /* THIS CODE IS BOGUS */
         int dummy;
