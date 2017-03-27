@@ -156,7 +156,32 @@ static void print()
 
 static void stmt()
 {
-	/* YOUR CODE GOES HERE */
+	switch(token){
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+		case 'e':
+		case 'f':
+		case 'g':
+		case 'h':
+		case 'i':
+		case 'j':
+		case 'k':
+		case 'l':
+		case 'm':
+		case 'n':
+		case 'o':
+		case 'p':
+			assign();
+			break;
+		case '!':
+			print();
+			break;
+		default:
+			ERROR("Symbol %c unknown\n", token);
+			exit(EXIT_FAILURE);
+	}
 }
 
 static void morestmts()
