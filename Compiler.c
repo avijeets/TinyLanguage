@@ -123,20 +123,58 @@ static int expr()
 		reg = next_register();
 		CodeGen(ADD, left_reg, right_reg, reg);
 		return reg;
+	case '-':
+		next_token();
+		left_reg = expr();
+		right_reg = expr();
+		reg = next_register();
+		CodeGen(SUB, left_reg, right_reg, reg);
+		return reg;
+	case '/':
+		next_token();
+		left_reg = expr();
+		right_reg = expr();
+		reg = next_register();
+		CodeGen(DIV, left_reg, right_reg, reg);
+		return reg;
+	case '*':
+		next_token();
+		left_reg = expr();
+		right_reg = expr();
+		reg = next_register();
+		CodeGen(MUL, left_reg, right_reg, reg);
+		return reg;
 
-
-        case 'f':
-                return variable();
-
-
+	// check for variables, then go to corresponding method for variables
+	case 'a':
+    case 'b':
+    case 'c':
+    case 'd':
+    case 'e':
+    case 'f':
+    case 'g':
+    case 'h':
+    case 'i':
+    case 'j':
+    case 'k':
+    case 'l':
+    case 'm':
+    case 'n':
+    case 'o':
+    case 'p':
+            return variable();
+	//check for digits, then go to corresponding method for digits
+	case '0':
 	case '1':
-                return digit();
-
 	case '2':
-                return digit();
-
 	case '3':
-                return digit();
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+            return digit();
 
 	default:
 		ERROR("Symbol %c unknown\n", token);
@@ -147,51 +185,49 @@ static int expr()
 static void assign()
 {
 	// VARIABLE = EXPR
+	char tokenVariable;
+	tokenVariable = token;
+	next_token();
+	if (token != '=') exit(EXIT_FAILURE);
+	int registerExpr;
+	next_token();
+	registerExpr = expr();
+	CodeGen(STOREAI, reg, 0, offset);
 }
 
 static void print()
 {
 	// # VARIABLE
+	next_token(); // MARK: error check for #?
+	CodeGen(OUTPUTAI, 0, (token-'a')*4, 0);
+	next_token();
 }
 
 static void stmt()
 {
 	//  STMT ::= ASSIGN | PRINT
-	switch(token){
-		case 'a':
-		case 'b':
-		case 'c':
-		case 'd':
-		case 'e':
-		case 'f':
-		case 'g':
-		case 'h':
-		case 'i':
-		case 'j':
-		case 'k':
-		case 'l':
-		case 'm':
-		case 'n':
-		case 'o':
-		case 'p':
-			assign();
-			break;
-		case '!':
-			print();
-			break;
-		default:
-			ERROR("Symbol %c unknown\n", token);
-			exit(EXIT_FAILURE);
-	}
+	if(is_identifier(token))
+	{
+		assign();
+	} else if(token == '#')
+	{
+       print();
+    } else
+	{
+        exit(EXIT_FAILURE);
+    }
 }
 
+//MARK: CHECK FOR EPSILON (.)
 static void morestmts()
 {
 	// MORESTMTS ::= ; STMTLIST | epsilon
 	if(token == ';'){
         next_token();
         stmtlist();
-    }
+    } else {
+		printf("Token error during morestmts.");
+	}
 }
 
 static void stmtlist()
@@ -204,12 +240,7 @@ static void stmtlist()
 static void program()
 {
 	// STMTLIST .
-
-        /* THIS CODE IS BOGUS */
-        int dummy;
-        /* THIS CODE IS BOGUS */
-	dummy = expr();
-
+	stmtlist();
 	if (token != '.') {
 	  ERROR("Program error.  Current input symbol is %c\n", token);
 	  exit(EXIT_FAILURE);
