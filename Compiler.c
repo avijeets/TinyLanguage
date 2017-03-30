@@ -115,92 +115,95 @@ static int expr()
 	int reg, left_reg, right_reg;
 
 	switch (token) {
+		case '+':
+			next_token();
+			left_reg = expr();
+			right_reg = expr();
+			reg = next_register();
+			CodeGen(ADD, left_reg, right_reg, reg);
+			return reg;
+		case '-':
+			next_token();
+			left_reg = expr();
+			right_reg = expr();
+			reg = next_register();
+			CodeGen(SUB, left_reg, right_reg, reg);
+			return reg;
+		case '%':
+			next_token();
+			left_reg = expr();
+			right_reg = expr();
+			reg = next_register();
+			CodeGen(DIV, left_reg, right_reg, reg);
+			return reg;
+		case '*':
+			next_token();
+			left_reg = expr();
+			right_reg = expr();
+			reg = next_register();
+			CodeGen(MUL, left_reg, right_reg, reg);
+			return reg;
 
-	case '+':
-		next_token();
-		left_reg = expr();
-		right_reg = expr();
-		reg = next_register();
-		CodeGen(ADD, left_reg, right_reg, reg);
-		return reg;
-	case '-':
-		next_token();
-		left_reg = expr();
-		right_reg = expr();
-		reg = next_register();
-		CodeGen(SUB, left_reg, right_reg, reg);
-		return reg;
-	case '/':
-		next_token();
-		left_reg = expr();
-		right_reg = expr();
-		reg = next_register();
-		CodeGen(DIV, left_reg, right_reg, reg);
-		return reg;
-	case '*':
-		next_token();
-		left_reg = expr();
-		right_reg = expr();
-		reg = next_register();
-		CodeGen(MUL, left_reg, right_reg, reg);
-		return reg;
+		// check for variables, then go to corresponding method for variables
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+		case 'e':
+		case 'f':
+		case 'g':
+		case 'h':
+		case 'i':
+		case 'j':
+		case 'k':
+		case 'l':
+		case 'm':
+		case 'n':
+		case 'o':
+		case 'p':
+		    return variable();
+		//check for digits, then go to corresponding method for digits
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+		    return digit();
 
-	// check for variables, then go to corresponding method for variables
-	case 'a':
-    case 'b':
-    case 'c':
-    case 'd':
-    case 'e':
-    case 'f':
-    case 'g':
-    case 'h':
-    case 'i':
-    case 'j':
-    case 'k':
-    case 'l':
-    case 'm':
-    case 'n':
-    case 'o':
-    case 'p':
-            return variable();
-	//check for digits, then go to corresponding method for digits
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-            return digit();
-
-	default:
-		ERROR("Symbol %c unknown\n", token);
-		exit(EXIT_FAILURE);
-	}
+		default:
+			ERROR("Symbol %c unknown\n", token);
+			exit(EXIT_FAILURE);
+		}
 }
 
 static void assign()
 {
 	// VARIABLE = EXPR
 	char tokenVariable;
+	int registerExpr;
 	tokenVariable = token;
 	next_token();
-	if (token != '=') exit(EXIT_FAILURE);
-	int registerExpr;
+	if (token != '=')
+	{
+		ERROR("Invalid token assignment and type.");
+		exit(EXIT_FAILURE);
+	}
 	next_token();
 	registerExpr = expr();
-	CodeGen(STOREAI, reg, 0, offset);
+	CodeGen(STOREAI, registerExpr, 0, (token-'a')*4);
 }
 
 static void print()
 {
 	// # VARIABLE
-	next_token(); // MARK: error check for #?
-	CodeGen(OUTPUTAI, 0, (token-'a')*4, 0);
 	next_token();
+	CodeGen(OUTPUTAI, 0, (token-'a')*4, EMPTY_FIELD);
+	next_token(); // continue tokens
 }
 
 static void stmt()
@@ -214,7 +217,8 @@ static void stmt()
        print();
     } else
 	{
-        exit(EXIT_FAILURE);
+		ERROR("Program error. Current input symbol is %c\n", token);
+		exit(EXIT_FAILURE);
     }
 }
 
@@ -222,12 +226,15 @@ static void stmt()
 static void morestmts()
 {
 	// MORESTMTS ::= ; STMTLIST | epsilon
-	if(token == ';'){
+	if(token == ';')
+	{
         next_token();
-        stmtlist();
-    } else {
-		printf("Token error during morestmts.");
+    }
+	if (token == '.') // error check
+	{
+		return;
 	}
+	stmtlist();
 }
 
 static void stmtlist()
@@ -241,10 +248,11 @@ static void program()
 {
 	// STMTLIST .
 	stmtlist();
-	if (token != '.') {
+	if (token != '.')
+	{
 	  ERROR("Program error.  Current input symbol is %c\n", token);
 	  exit(EXIT_FAILURE);
-	};
+	}
 }
 
 /*************************************************************************/

@@ -70,8 +70,11 @@ void PrintInstructionList(FILE * outfile, Instruction * instr)
 		exit(EXIT_FAILURE);
 	}
 
-	/* YOUR CODE GOES HERE */
-
+	while (instr != NULL)
+	{
+		PrintInstruction(outfile, instr);
+		instr = instr -> next;
+	}
 }
 
 Instruction *ReadInstruction(FILE * infile)
@@ -231,4 +234,3 @@ Instruction *LastInstruction(Instruction * instr)
 		instr = instr->next;
 	return instr;
 }
-
